@@ -24,7 +24,9 @@ function obj = bin(obj,varargin)
 % Matlab® indexing, for example: D(:,1,1) = linspace(0,1,100)
 
 % find the first string option
+[val,opt] = nd.findoption(varargin);
 
+if obj
 
 
 end

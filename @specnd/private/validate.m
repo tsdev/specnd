@@ -7,7 +7,7 @@ function validate(D)
 mainField     = {'datcnt' 'errmon' 'g' 'axis' 'channel' 'param' 'log' 'fit'};
 nMainField    = numel(mainField);
 checkSubField = [    true     true true   true      true    true false false];
-subField  = {'value' 'name' 'label'};
+subField      = {'value' 'name' 'label'};
 
 % check that all necessary fields are there
 isMainField = isfield(D.raw,mainField);
@@ -27,7 +27,7 @@ for ii = 1:nMainField
 end
 
 % datcnt and errmon
-isgrid = isgridmode(D);
+ishist = ishistmode(D);
 nCh    = nch(D);
 nAxis  = naxis(D);
 
@@ -35,12 +35,21 @@ nAxis  = naxis(D);
 nAxis2 = size(D.raw.datcnt.value);
 nAxis3 = size(D.raw.errmon.value);
 
+% check that all cell are row vectors
+cSize = [size(D.raw.axis.value,1) size(D.raw.axis.name,1) size(D.raw.axis.label,1);...
+size(D.raw.channel.value,1) size(D.raw.channel.name,1) size(D.raw.channel.label,1);...
+size(D.raw.param.value,1) size(D.raw.param.name,1) size(D.raw.param.label,1)];
+
+if any(cSize~=1)
+    error('specnd:WrongDim','One of the field of axis, channel or param is not a row cell vector!')
+end
+
 % check data dim == error dim
 if (numel(nAxis2)~=numel(nAxis3)) || any(nAxis2-nAxis3)
     error('specnd:WrongDim','Data, error, channel, g or axis dimensions are incompatible!');
 end
 
-if isgrid
+if ishist
     
     % remove the stupid 2nd dimension of column vectors (Matlab shit)
     if numel(nAxis2) == 2 && nAxis2(2) == 1
@@ -60,8 +69,8 @@ if isgrid
     end
     
 else
-    nPoint = nAxis2(2);
-    if nAxis2(1)~=1 || numel(Axis2)>2  || nAxis2(2)~=nPoint || any(nAxis-nPoint) || numel(D.raw.channel.value)~=nPoint
+    nPoint = nAxis2(1);
+    if nAxis2(2)~=1 || numel(nAxis2)>2  || any(nAxis-nPoint) || numel(D.raw.channel.value)~=nPoint
         error('specnd:WrongDim','Data, error, channel, g or axis dimensions are incompatible!');
     end
     

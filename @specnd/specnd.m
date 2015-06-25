@@ -27,12 +27,21 @@ classdef specnd
     end
     methods
         function D = specnd(varargin)
+            
+            % separate optional arguments
+            optIdx = nd.findoption(varargin{:});
+            % number of input variables withouth options
+            nVari = optIdx-1;
+            
             % Empty the specnd object, 1 axis, no data points.
             D.raw.datcnt.value = zeros(0,1);
             D.raw.datcnt.name  = 'data';
             D.raw.datcnt.label = 'raw data';
-            D.raw.errmon = D.raw.datcnt;
-            
+
+            D.raw.errmon.value = zeros(0,1);
+            D.raw.errmon.name  = 'error';
+            D.raw.errmon.label = 'raw error';
+
             D.raw.axis.value{1} = zeros(1,0);
             D.raw.axis.name{1}  = 'x';
             D.raw.axis.label{1} = 'x-axis';
@@ -52,44 +61,94 @@ classdef specnd
             D.raw.log = struct;
             D.raw.fit = struct;
             
-            if nargin == 1
-                D.raw.datcnt.value = varargin{1};
-                D.raw.errmon.value = 0*D.raw.datcnt.value;
+            if nVari > 0
+                % input data matrix and optionally error matrix, plus axis
+                % vectors in a cell
+
+                % find the position a cell input argument
+                aVarIdx = find(cellfun(@(C)iscell(C),varargin(1:nVari)),1,'first');
                 
-                nAxis = size(D.raw.datcnt.value);
-                % remove stupid matlab extra dimension
-                if nAxis(end) == 1
-                    nAxis(end) = [];
+                if isempty(aVarIdx)
+                    % if no axis arguments in cell
+                    aVarIdx = nVari+1;
                 end
                 
-                nDim  = numel(nAxis);
-                for ii = 1:nDim
-                    D.raw.axis.value{ii} = 1:nAxis(ii);
-                    if nDim<=3
-                        D.raw.axis.name{ii} = char('x'+ii-1);
-                        D.raw.axis.label{ii} = [char('x'+ii-1) '-axis'];
+                if aVarIdx == 1
+                    error('specnd:WrongInput','M data matrix is missing.');
+                end
+                
+                switch nVari
+                    case 1
+                        D.raw.datcnt.value = varargin{1};
+                        D.raw.errmon.value = 0*D.raw.datcnt.value;
+                    case 2
+                        switch aVarIdx
+                            case 2
+                                D.raw.datcnt.value = varargin{1};
+                                D.raw.errmon.value = 0*D.raw.datcnt.value;
+                                D.raw.axis.value   = varargin{2}(:)';
+                            case 3
+                                D.raw.datcnt.value = varargin{1};
+                                D.raw.errmon.value = varargin{2};
+                        end
+                    case 3
+                        switch aVarIdx
+                            case 2
+                                D.raw.datcnt.value = varargin{1};
+                                D.raw.errmon.value = 0*D.raw.datcnt.value;
+                                D.raw.axis.value   = varargin{2}(:)';
+                            case 3
+                                D.raw.datcnt.value = varargin{1};
+                                D.raw.errmon.value = varargin{2};
+                                D.raw.axis.value  = varargin{3}(:)';
+                            case 4
+                                D.raw.datcnt.value = varargin{1};
+                                D.raw.errmon.value = varargin{2};
+                        end
+                end
+                
+                % check for event mode
+                if sum(size(D.raw.axis.value{1})>1)>1
+                    % axis is 2D matrix or higher dim --> event mode
+                    nDim   = size(D.raw.axis.value{1},2);
+                    nPoint = size(D.raw.datcnt.value,1);
+                    
+                    D.raw.channel.value = ones(nPoint,1);
+                else
+                    % histogram mode
+                    nAxis = size(D.raw.datcnt.value);
+                    
+                    nDim  = numel(D.raw.axis.value);
+                    
+                    if isempty(D.raw.axis.value{1})
+                        for ii = 1:nDim
+                            D.raw.axis.value{ii} = (1:nAxis(ii))';
+                        end
                     else
-                        D.raw.axis.name{ii} = ['x' num2str(ii)];
-                        D.raw.axis.label{ii} = ['x' num2str(ii) '-axis'];
+                        % transpose axis if necessary
+                        for ii = 1:nDim
+                            D.raw.axis.value{ii} = D.raw.axis.value{ii}(:);
+                        end
+                    end
+                    
+                end
+                
+                if numel(D.raw.axis.name) < nDim
+                    for ii = 1:nDim
+                        if nDim<=3
+                            D.raw.axis.name{ii}  = char('x'+ii-1);
+                            D.raw.axis.label{ii} = [char('x'+ii-1) '-axis'];
+                        else
+                            D.raw.axis.name{ii}  = ['x' num2str(ii)];
+                            D.raw.axis.label{ii} = ['x' num2str(ii) '-axis'];
+                        end
                     end
                 end
-                
+
                 D.raw.g.value = eye(nDim);
+                
             end
             validate(D);
-        end
-        function n = ndims(D)
-            n = numel(D.raw.axis.label);
-        end
-        function n = naxis(D,idx)
-            if nargin == 1
-                idx = 1:ndims(D);
-            end
-            n = [];
-            for ii = 1:ndims(D)
-                n(ii) = numel(D.raw.axis.value{ii}); %#ok<AGROW>
-            end
-            n = n(idx);
         end
         
     end
