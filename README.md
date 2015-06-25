@@ -1,7 +1,7 @@
-specnd
+specnd *[spekendi:]*
 ======
 
-**specnd** *[spekendi:]* is a multidimensional data analysis toolbox for Matlab® with error and multiple data channel handling
+**specnd** is a multidimensional data analysis toolbox for Matlab® with error and multiple data channel handling
 
 
 Features:
