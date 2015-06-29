@@ -8,7 +8,7 @@ if ishistmode(D)
     
     for ii = 1:nDim
         nTemp = size(D.raw.axis.value{ii});
-        if numel(nTemp)>2 || nTemp(2)~=1
+        if numel(nTemp)>2 || nTemp(2) > 1
             error('specnd:WrongDim','Data, error, channel, g or axis dimensions are incompatible!');
         end
         nAxis(ii) = nTemp(1);

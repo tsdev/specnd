@@ -53,7 +53,11 @@ if ishist
     
     % remove the stupid 2nd dimension of column vectors (Matlab shit)
     if numel(nAxis2) == 2 && nAxis2(2) == 1
-        nAxis2 = nAxis2(1);
+        if nAxis2(1) == 0
+            nAxis2 = nAxis2(2);
+        else
+            nAxis2 = nAxis2(1);
+        end
     end
     
     nAxis = [nAxis nCh];
