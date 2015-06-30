@@ -25,5 +25,8 @@ dat(:,end+1) = 0;
 surf(xx,yy,dat);
 axis([eBin{1}([1 end])' eBin{2}([1 end])']);
 view(2)
+xlabel(D.raw.axis.label{1})
+ylabel(D.raw.axis.label{2})
+zlabel(D.raw.datcnt.label)
 
 end
