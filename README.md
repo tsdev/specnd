@@ -13,7 +13,7 @@ Features:
   * stores measurement parameters
   * can include a metric tensor to represent reciprocal space
   * flexible plotting, import, export functions
-  * optimised for speed and flexibility (not for memory - no large datasets)
+  * optimised for speed and flexibility (and to treat large datasets not fitting into the memory)
   * simple internal data structure, easily accessible
   * includes physical units along every axis with automatic conversion
   * syntax is optimized for command line usage
