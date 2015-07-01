@@ -4,7 +4,7 @@ fDir  = '~/Desktop/YBCF_data_80meV/';
 fName = 'YBCO_*.nxspe';
 
 h5fName = 'YBCF_1.hdf';
-nBin    = [20 20 20];
+nBin    = [10 10 10];
 fList   = dir([fDir fName]);
 fIdx    = 1:numel(fList);
 cFact   = 0.1; % chunk size in unit of the pixel number
