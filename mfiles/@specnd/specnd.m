@@ -82,8 +82,8 @@ classdef specnd < handle
                         D.raw.datcnt.value = varargin{2};
                         D.raw.errmon.value = 0*D.raw.datcnt.value;
                     case 3
-                        D.raw.datcnt.value = varargin{1};
-                        D.raw.errmon.value = varargin{2};
+                        D.raw.datcnt.value = varargin{2};
+                        D.raw.errmon.value = varargin{3};
                 end
                 
                 % check for event mode
@@ -118,7 +118,7 @@ classdef specnd < handle
                         D.raw.datcnt.value = D.raw.datcnt.value(selector{:});
                         
                     end
-                    
+                    axDim   = numel(D.raw.axis.value);
                 end
                 
                 if numel(D.raw.axis.name) < axDim
