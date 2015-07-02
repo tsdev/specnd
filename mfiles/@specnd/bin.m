@@ -1,9 +1,23 @@
 function bin(D,varargin)
-% bins/rebins/integrate data
+% bins/rebins/average data
+%
+% bin(D,V1,V2,...)
+%
+% Bins event mode data into a histogram mode data. Bins along every data
+% dimension (ndim(D)) have to be given.
 %
 % bin(D,V1,V2,...,idx)
 %
+% Rebins histogram mode data, where new bins are provided along dimensions
+% selected by idx vector.
 %
+% Each bin will take the average value of points thats coordinates are
+% within the bin boundaries. The given bin vectors interpreted as bin
+% boundary points by default. Empty bins are substituted by NaN value and
+% error bars are calculated by the Gaussian error propagation rule.
+%
+% See also ndext.histn.
+
 % D(:,:,V) or bin(D,V,3) Operation on the 3rd dimension using the V vector
 % The binning method is determined by the global option ?binmethod? with
 % values ?weight?,?sliding?,?center?, it can be temporarily overwritten
@@ -52,29 +66,27 @@ if ~ishistmode(D)
     end
     
     % do the bin
-    [D.raw.datcnt.value,Nsum] = ndext.histn(D.raw.axis.value{1},D.raw.datcnt.value,bin{:});
+    [Ysum,Nsum] = ndext.histn(D.raw.axis.value{1},...
+        [D.raw.datcnt.value D.raw.errmon.value.^2],bin{:},'emptyval',[NaN 1]);
+    % create the dimension selector
+    selDim = repmat({':'},1,ndim(D));
     % take the average of the event values
-    D.raw.datcnt.value = D.raw.datcnt.value./Nsum;
-    % TODO substitute empty pixels with defined data
-    
-    % do the bin on the error
-    D.raw.errmon.value = ndext.histn(D.raw.axis.value{1},D.raw.errmon.value.^2,bin{:});
-    D.raw.errmon.value = sqrt(D.raw.errmon.value)./Nsum;
+    D.raw.datcnt.value = Ysum(selDim{:},1)./Nsum;
+    D.raw.errmon.value = sqrt(Ysum(selDim{:},2))./Nsum;
     
     % define new axis values
     D.raw.axis.value = cellfun(@(C)(C(1:end-1)+C(2:end))'/2,bin(:)','UniformOutput',false);
     validate(D);
     
 else
-    % rebin the data
+    % rebins the data
     % selects data dimensions to bin
     idx = varargin{nVari};
     % check that the bins are right
     if numel(idx)~=(nVari-1) || max(idx) > ndim(D)
         error('specnd:bin:WrongInput','Wrong number of input bins!');
     end
-
-        
+    
     % create new bins where only the bin width is given
     nBin = cellfun(@(C)numel(C),varargin(1:(nVari-1)));
     lim  = [cellfun(@(C)min(C),D.raw.axis.value); cellfun(@(C)max(C),D.raw.axis.value)];
@@ -93,7 +105,7 @@ else
             bin(ii) = D.raw.axis.value(ii);
             % create edge bins from center bins
             bin = [(3*bin(1)-bin(2))/2 (bin(1:(end-1))+bin(2:end))/2 (3*bin(end)-bin(end-1))/2];
-
+            
         end
         bin{ii} = bin{ii}(:);
     end
@@ -104,29 +116,19 @@ else
     % create the column list of coordinates
     X = reshape(cell2mat(permute(X,[1 3 2])),[],ndim(D));
     
-    % put NaN data points outside of the bin boundary
-    X(isnan(D.raw.datcnt.value(:)),1) = bin{1}(end)+1;
-    
     % bin the data
-    [D.raw.datcnt.value,Nsum] = ndext.histn(X,D.raw.datcnt.value(:),bin{:});
-    % take the average of the event values
-    D.raw.datcnt.value = D.raw.datcnt.value./Nsum;
-    % TODO substitute empty pixels with defined data
-    
-    % do the bin on the error
-    D.raw.errmon.value = ndext.histn(X,D.raw.errmon.value(:).^2,bin{:});
-    D.raw.errmon.value = sqrt(D.raw.errmon.value)./Nsum;
+    [Ysum,Nsum] = ndext.histn(X,[D.raw.datcnt.value(:) ...
+        D.raw.errmon.value(:).^2],bin{:},'emptyval',[NaN 1]);
+    % create the dimension selector
+    selDim = repmat({':'},1,ndim(D));
+    % take the average of the event values and calculate error
+    D.raw.datcnt.value = Ysum(selDim{:},1)./Nsum;
+    D.raw.errmon.value = sqrt(Ysum(selDim{:},2))./Nsum;
     
     % define new axis values
     D.raw.axis.value = cellfun(@(C)(C(1:end-1)+C(2:end))/2,bin(:),'UniformOutput',false);
     validate(D);
-
+    
 end
 
 end
-
-
-
-
-
-

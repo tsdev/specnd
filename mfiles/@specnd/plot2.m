@@ -29,5 +29,6 @@ view(2)
 xlabel(D.raw.axis.label{1})
 ylabel(D.raw.axis.label{2})
 zlabel(D.raw.datcnt.label)
+colorbar
 
 end
