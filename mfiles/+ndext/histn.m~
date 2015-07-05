@@ -134,7 +134,7 @@ end
 for ii = 1:N
     % check bin for uniformity
     dBin = diff(bin{ii}(1:2));
-    if any(abs(diff(bin{ii})-dBin)>eps)
+    if any(diff(bin{ii})-dBin)
         % non uniform bin
         X(:,ii) = interp1(bin{ii},1:nBin(ii)+1,X(:,ii),'previous',nBin(ii)+1);
         % remove the elements that are equal to the last bin edge
@@ -150,8 +150,8 @@ for ii = 1:N
         % REMOVED
         % X(lastIdx,ii) = bin{ii}(end);
         % make NaN for outliers
-        X(X(:,ii)<1 | X(:,ii)>nBin(ii),ii) = nBin(ii)+1;
-        %X(X(:,ii)>nBin(ii),ii) = NaN;
+        X(X(:,ii)<1,ii)    = NaN;
+        X(X(:,ii)>nBin(ii),ii) = NaN;
     end
 end
 
@@ -189,17 +189,15 @@ end
 
 % cut off the extra pix again usign variable number of higher dimensions if
 % there is any NaN value
-selDim = cell(1,N);
-for ii = 1:N
-    selDim{ii} = 1:nBin(ii);
-end
-Ysum   = Ysum(selDim{:},:);
+Ysum   = Ysum(1:end-1,selDim{:});
 
 % calculate the number of accumulated points per bin if requested
 if nargout>1
     nPoint = size(Y,1);
-    Nsum = accumarray(X,ones(nPoint,1),nBin+1,[],emptyval(2));
-    Nsum = Nsum(selDim{:});
+    Nsum = accumarray(X,ones(nPoint,1),nBin,[],emptyval(2));
+    if anynan
+        Nsum   = Nsum(1:end-1,selDim{:});
+    end
 end
 
 end
