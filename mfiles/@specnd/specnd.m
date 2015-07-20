@@ -27,6 +27,15 @@ classdef specnd < handle
     end
     methods
         function D = specnd(varargin)
+            
+            % create specnd object from struct
+            if nargin == 1 && isstruct(varargin{1})
+                D.raw = varargin{1};
+                validate(D);
+                return;
+            end
+                
+            
             % input arguments: X, Y, E
             
             % separate optional arguments
