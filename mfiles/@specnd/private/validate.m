@@ -4,7 +4,7 @@ function validate(D)
 % VALIDATE(D)
 %
 
-mainField     = {'datcnt' 'errmon' 'g' 'axis' 'channel' 'param' 'log' 'fit'};
+mainField     = {'sig' 'err' 'mon' 'g' 'axis' 'ch' 'par' 'log' 'fit'};
 nMainField    = numel(mainField);
 checkSubField = [    true     true true   true      true    true false false];
 subField      = {'value' 'name' 'label'};
