@@ -69,7 +69,11 @@ classdef specnd < handle
             %D.raw.log = struct([]);
             %D.raw.fit = struct([]);
             
-            if nVari > 0
+            if nVari == 1
+                error('specnd:specnd:WrongInput','Missing signal values!')
+            end
+            
+            if nVari > 1
                 % input arguments: X, Y, E
                 %
                 % X     matrix or cell
@@ -79,18 +83,49 @@ classdef specnd < handle
                 
                 if iscell(varargin{1})
                     if ~isempty(varargin{1})
+                        % check that the length of the vectors are equal to
+                        % the size of the signal matrix
+                        nAxis  = cellfun(@(C)numel(C),varargin{1});
+                        datDim = size(varargin{2});
+                        if numel(nAxis) == 1 && datDim(2) == 1
+                            datDim = datDim(1);
+                        end
+                        if numel(nAxis)>numel(datDim) && all(nAxis(numel(datDim)+1:end)==1)
+                            datDim((end+1):numel(nAxis)) = 1;
+                        end
+                        
+                        if any(nAxis-datDim)
+                            error('specnd:specnd:WrongInput',['Dimensions of input signal matrix '...
+                                'is incompatible with the given coordinate matrices!'])
+                        end
+                        
                         % create the right size of the struct
                         D.raw.ax(numel(varargin{1}),1).value = [];
                         % fill up the value fields with the input coordinate values
                         [D.raw.ax(:).value] = deal(varargin{1}{:});
                     end
                 else
-                    D.raw.ax(1).value = varargin{1};
+                    % check that the input signal has the right dimensions
+                    if size(varargin{2},2)>1
+                        varargin{2} = varargin{2}.';
+                    end
+                    
+                    cSize = size(varargin{1})==size(varargin{2},1);
+                    if ~any(cSize)
+                        error('specnd:specnd:WrongInput','Wrong input data dimensions!');
+                    end
+                    if sum(cSize)==1 && cSize(2)
+                        varargin{1} = varargin{1}.';
+                    end
+                    
+                    % split up the event mode coordinates 
+                    % create the right size of the struct
+                    D.raw.ax(size(varargin{1}),2).value = [];
+                    [D.raw.ax(:).value] = deal(varargin{1});
+                    %D.raw.ax(1).value = varargin{1};
                 end
                 
                 switch nVari
-                    case 1
-                        error('specnd:specnd:WrongInput','Missing necessary Y input argument!')
                     case 2
                         D.raw.sig.value = varargin{2};
                     case 3
@@ -128,7 +163,7 @@ classdef specnd < handle
                         D.raw.sig.value = D.raw.sig.value.';
                     end
                     
-                    SS = arrayfun(@(S)size(S.value),D.raw.ax,'Uniformoutput',false);
+                    size(D.raw.ax
                     %if size(D.raw.ax(1).value
                     
                     nAxis  = size(D.raw.axis.value{1},2);    
