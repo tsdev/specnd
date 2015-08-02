@@ -16,7 +16,18 @@ function ishist = ishistmode(D)
 %               true    histogram mode (data is binned).
 %
 
-if size(D.raw.axis.value{1},2) > 1
+nAxis = naxis(D);
+
+% empty objects are in histogram mode
+if ndim(D) == 0
+    ishist = true;
+    return
+end
+
+nSig  = size(D.raw.sig.val);
+nSig  = [nSig ones(1,numel(nAxis)-numel(nSig))];
+
+if numel(D.raw.ax)>1 && any(nSig~=nAxis)
     ishist = false;
 else
     ishist = true;

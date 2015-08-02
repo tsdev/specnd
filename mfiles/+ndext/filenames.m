@@ -9,11 +9,13 @@ function [fName,fDir, brSel, sySel] = filenames(filedesc)
 % Matlab notation:
 %
 % [N1]                      --> v = N1
+% [N1 N2 N3 N4 ...]         --> v = [N1 N2 N3 N4]
 % [N1 symbol N2]            --> v = N1:1:N3
 % [N1 symbol N2 symbol N3]  --> v = N1:N2:N3
 %
 % The symbol can be one of the following characters:
-% !,",#,$,%,&,',*,+,:,;,<,>,?,^,` and whitespace.
+% !,",#,$,%,&,',*,+,:,;,<,>,?,^,` and whitespace. Whitespace is a special
+% character, that allows an arbitrary long list of integers
 %
 % In the file name description only a single type of bracket and one type
 % symbol is allowed at once. For example a valid file name description:
@@ -32,9 +34,11 @@ symbol  = '!"#$%&*+:;<>?^`'' ';
 
 % check for a common error: wrong file separator
 if filesep == '/' && any(filedesc=='\')
-    error('ndext:filenames:WrongInput','Wrong file name separator is used, use ''/'' instead!')
+    error('ndext:filenames:WrongInput',['Wrong file name separator is '...
+        'used, use ''/'' instead!'])
 elseif filesep == '\' && any(filedesc=='\')
-    error('ndext:filenames:WrongInput','Wrong file name separator is used, use ''/'' instead!')
+    error('ndext:filenames:WrongInput',['Wrong file name separator is '...
+        'used, use ''/'' instead!'])
 end
 
 % separate the folder name from the file
@@ -75,7 +79,8 @@ if numel(brIdx) == 0
 end
 
 if numel(brIdx)==1 || numel(brIdx)>2 || diff(brIdx)~=1 || mod(brIdx(1),2)==0
-    error('ndext:filenames:WrongInput','The file name has to contain a single pair of bracket!')
+    error('ndext:filenames:WrongInput',['The file name has to contain a '...
+        'single pair of bracket!'])
 end
 
 if numel(syIdx)==0
@@ -88,8 +93,13 @@ if numel(syIdx)==0
     return
 end
 
-if numel(syIdx)>2 || syLoc(1)<brLoc(1) || syLoc(end)>brLoc(2)
-    error('ndext:filenames:WrongInput','In the file name the symbols should be inside the brackets')
+if syLoc(1)<brLoc(1) || syLoc(end)>brLoc(2)
+    error('ndext:filenames:WrongInput',['In the file name the symbols '...
+        'should be inside the brackets'])
+end
+if numel(syIdx)>2 && symbol(syIdx(1)) ~= ' '
+    error('ndext:filenames:WrongInput',['In the file name the symbols '...
+        'should be inside the brackets'])
 end
 
 % keep the filename outside of the brackets
@@ -97,21 +107,22 @@ lFile = filedesc(1:(brLoc(1)-1));
 rFile = filedesc((brLoc(2)+1):end);
 cFile = filedesc((brLoc(1)+1):(brLoc(2)-1));
 
-% relative location of symbols
-%syLoc = syLoc - brLoc(1);
-
 % extracts numbers
 nums = str2double(strsplit(cFile,symbol(syIdx(1))));
 
 if any(isnan(nums))
-    error('ndext:filenames:WrongInput','In the file name string inside the brackets only integer are allowed!')
+    error('ndext:filenames:WrongInput',['In the file name string inside '...
+        'the brackets only integers a single type of symbol are allowed!'])
 end
 
 % create numors
-if numel(nums)==2
-    nums = nums(1):nums(2);
-else
-    nums = nums(1):nums(2):nums(3);
+if symbol(syIdx(1)) ~= ' '
+    
+    if numel(nums)==2
+        nums = nums(1):nums(2);
+    else
+        nums = nums(1):nums(2):nums(3);
+    end
 end
 
 fName = num2str(nums',[lFile '%d' rFile]);

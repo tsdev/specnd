@@ -5,7 +5,7 @@ function rPref = getpref(prefName)
 %
 % Returns the names, values and labels of each preferences. Default values
 % are returned, where no value is saved. rPref is a struct with field names
-% 'name', 'label' and 'value. Each field is a cell.
+% 'name', 'label' and 'val'. Each field is a cell.
 %
 % rPref = ndext.getpref(pName)
 %
@@ -33,20 +33,28 @@ dn = {      'fid'       'binmethod' 'bintype'   'autosort'  'ach'   };
 dv = {      1           'center'    'center'    'true'      []      };
 dn = [dn {  'importfun' 'datapath'  'filename'  'emptyval'  'mon'   }];
 dv = [dv {  []          ''          ''          nan         1       }];
-dPref.name  = [dn {     'errfun'    }];
-dPref.value = [dv {     @sqrt       }];
+dn = [dn {     'errfun'    }];
+dv = [dv {     @sqrt       }];
 
-dPref.label = { 'file identifier for text output'...
-                'signal binning method: center/weight/sliding'...
-                'type of bin in histogram mode: center/boundary'...
-                'automatically sort coordinates when necessary'...
-                'index of active channel'...
-                'handle of the data import function'...
-                'path to the data folder'...
-                'file name format to fast file import'...
-                'signal value for empty pixels'...
-                'global monitor value'...
-                'function that calculates the error bar from a given signal value'};
+dl = {...
+    'file identifier for text output'...
+    'signal binning method: center/weight/sliding'...
+    'type of bin in histogram mode: center/boundary'...
+    'automatically sort coordinates when necessary'...
+    'index of active channel'...
+    'handle of the data import function'...
+    'path to the data folder'...
+    'file name format to fast file import'...
+    'signal value for empty pixels'...
+    'global monitor value'...
+    'function that calculates the error bar from a given signal value'...
+    };
+
+dPref = struct('val',{},'name',{},'label',{});
+
+[dPref(1:numel(dv),1).name] = dn{:};
+[dPref(:).label]          = dl{:};
+[dPref(:).val]            = dv{:};
 
 % get stored preferences
 sPref = getpref('specnd_global');
@@ -61,20 +69,17 @@ if (nargin>0)
     % if a specific value is requested, check if it exist in the default value
     % list
     
-    iPref = find(strcmp(prefName,dPref.name),1);
+    iPref = find(strcmp(prefName,{dPref(:).name}),1);
     if isempty(iPref)
         error('specnd:getndpref:WrongName','The requested specnd preference does not exists!');
     end
     
     % if a specific value is requested and it exists, return it
-    if isfield(sPref,prefName)
-        rPref.value = sPref.(prefName);
-    else
-        rPref.value = dPref.value{iPref};
-    end
+    rPref = dPref(iPref);
     
-    rPref.name  = prefName;
-    rPref.label = dPref.label{iPref};
+    if isfield(sPref,prefName)
+        rPref.val = sPref.(prefName);
+    end
     
     return
 else
@@ -84,7 +89,7 @@ else
     if ~isempty(sPref)
         fPref = fieldnames(sPref);
         for ii = 1:numel(fPref)
-            rPref.value{strcmp(fPref{ii},dPref.name)} = sPref.(fPref{ii});
+            rPref(strcmp(fPref{ii},{dPref(:).name})).val = sPref.(fPref{ii});
         end
     end
     

@@ -4,79 +4,73 @@ function validate(D)
 % VALIDATE(D)
 %
 
-mainField     = {'sig' 'err' 'mon' 'g' 'axis' 'ch' 'par' 'log' 'fit'};
+mainField     = {'sig' 'g' 'ch' 'par'};
 nMainField    = numel(mainField);
-checkSubField = [    true     true true   true      true    true false false];
-subField      = {'value' 'name' 'label'};
+subField      = {'val' 'name' 'label'};
 
 % check that all necessary fields are there
 isMainField = isfield(D.raw,mainField);
 if ~all(isMainField)
-    error('specnd:MissingField','Necessary field(s) of D.raw are missing!');
+    error('specnd:validate:MissingField','Necessary field(s) of of the specnd object are missing!');
 end
 
 % check that all necessary subfields are there
 for ii = 1:nMainField
-    if checkSubField(ii)
-        isSubField = isfield(D.raw.(mainField{ii}),subField);
-        if ~all(isSubField)
-            idx = find(isSubField==0,1);
-            error('specnd:MissingSubField','Necessary subfield D.raw.%s.%s is missing!',mainField{ii},subField{idx});
-        end
+    if ii == 1
+        subField0 = [subField {'err' 'mon'}];
+    else
+        subField0 = subField;
+    end
+    isSubField = isfield(D.raw.(mainField{ii}),subField0);
+    if ~all(isSubField)
+        idx = find(isSubField==0,1);
+        error('specnd:validate:MissingSubField','Necessary subfield D.raw.%s.%s is missing!',mainField{ii},subField0{idx});
     end
 end
 
-% datcnt and errmon
-ishist = ishistmode(D);
+% check that monitor and error have the same dimensions as the signal value
+if numel(D.raw.sig.err) ~= 1
+    if any(size(D.raw.sig.val) ~= size(D.raw.sig.err))
+        error('specnd:validate:WrongDim','Dimensions of signal value and error don''t agree!');
+    end
+end
+if numel(D.raw.sig.mon) ~= 1
+    if any(size(D.raw.sig.val) ~= size(D.raw.sig.mon))
+        error('specnd:validate:WrongDim','Dimensions of signal value and monitor don''t agree!');
+    end
+end
+
+% get different parameters of the object
 nCh    = nch(D);
 nAxis  = naxis(D);
 
+% check that all struct is a column vector
+sSize = structfun(@(S)size(S,2),D.raw);
 
-nAxis2 = size(D.raw.datcnt.value);
-nAxis3 = size(D.raw.errmon.value);
-
-% check that all cell are row vectors
-cSize = [size(D.raw.axis.value,1) size(D.raw.axis.name,1) size(D.raw.axis.label,1);...
-size(D.raw.channel.value,1) size(D.raw.channel.name,1) size(D.raw.channel.label,1);...
-size(D.raw.param.value,1) size(D.raw.param.name,1) size(D.raw.param.label,1)];
-
-if any(cSize~=1)
-    error('specnd:WrongDim','One of the field of axis, channel or param is not a row cell vector!')
+if any(sSize>1)
+    error('specnd:validate:WrongDim','Wrong dimensions of one of the subfields!')
 end
 
-% check data dim == error dim
-if (numel(nAxis2)~=numel(nAxis3)) || any(nAxis2-nAxis3)
-    error('specnd:WrongDim','Data, error, channel, g or axis dimensions are incompatible!');
-end
-
-if ishist
+if ishistmode(D)
     
-    % remove the stupid 2nd dimension of column vectors (Matlab shit)
-    if numel(nAxis2) == 2 && nAxis2(2) == 1
-        if nAxis2(1) == 0
-            nAxis2 = nAxis2(2);
-        else
-            nAxis2 = nAxis2(1);
+    
+    for ii = 1:numel(D.raw.ax)
+        if nAxis(ii) ~= size(D.raw.sig.val,ii)
+            error('specnd:validate:WrongDim','Signal and axis dimensions are incompatible!');
         end
     end
     
-    nAxis = [nAxis nCh];
-    
-    if any(nAxis(1:numel(nAxis2))-nAxis2) || any(nAxis((numel(nAxis2)+1):end)~=1)
-        error('specnd:WrongDim','Data, error, channel, g or axis dimensions are incompatible!');
-    end
-    
     % check g-tensor dimensions
-    nG = size(D.raw.g.value);
-    if numel(nG)>2 || nG(1)~=nG(2) || nG(1)~=ndim(D)
-        error('specnd:WrongDim','Data, error, channel, g or axis dimensions are incompatible!');
+    nG = size(D.raw.g.val);
+    if numel(nG)>2 || nG(1)~=nG(2) || (numel(D.raw.g.val)>1 && nG(1)~=ndim(D))
+        error('specnd:WrongDim','Signal and g-tensor dimensions are incompatible!');
     end
     
 else
-    nPoint = nAxis2(1);
-    if nAxis2(2)~=1 || numel(nAxis2)>2  || any(nAxis-nPoint) || numel(D.raw.channel.value)~=nPoint
-        error('specnd:WrongDim','Data, error, channel, g or axis dimensions are incompatible!');
-    end
+    %nPoint = nAxis2(1);
+    %if nAxis2(2)~=1 || numel(nAxis2)>2  || any(nAxis-nPoint) || numel(D.raw.channel.value)~=nPoint
+    %    error('specnd:WrongDim','Data, error, channel, g or axis dimensions are incompatible!');
+    %end
     
 end
 

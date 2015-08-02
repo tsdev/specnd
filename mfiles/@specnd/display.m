@@ -13,7 +13,6 @@ fprintf0(fid,'Number of channels (nCh): %3d\n',nch(D));
 fprintf0(fid,['Axis length (nAxis):     [' num2str(naxis(D)) ']\n']);
 
 % show all subfield of .raw
-fprintf0(fid,'\nsubfields of raw:\n');
-
+fprintf0(fid,'\nsubfields of raw:\n...\n');
 
 end

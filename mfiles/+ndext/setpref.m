@@ -22,10 +22,10 @@ end
 % check if the preference name exists
 dPref = ndext.getpref('default');
 
-iPref = find(strcmp(prefName,dPref.name),1,'first');
+iPref = find(strcmp(prefName,{dPref(:).name}),1,'first');
 if ~isempty(iPref)
     % check if the preferences label contains a choice string
-    str0 = strsplit(dPref.label{iPref},' ');
+    str0 = strsplit(dPref(iPref).label,' ');
     opt0 = strsplit(str0{end},'/');
     
     if numel(opt0) > 1

@@ -1,7 +1,7 @@
 function plot2(D,varargin)
 % plot 2D map of binned data
 
-cBin = D.raw.axis.value(1:2);
+cBin = {D.raw.ax(1:2).val};
 % calculate bin edges
 % bins with single element gets a +/- 0.5 width
 for ii = 1:2
@@ -15,7 +15,7 @@ end
 
 [xx,yy] = ndgrid(eBin{:});
 
-dat = D.raw.datcnt.value;
+dat = D.raw.sig.val;
 dat(isnan(dat)) = 0;
 
 % add extra pad for surf plot
@@ -26,9 +26,9 @@ sHandle = surf(xx,yy,dat);
 set(sHandle,'edgealpha',0)
 axis([eBin{1}([1 end])' eBin{2}([1 end])']);
 view(2)
-xlabel(D.raw.axis.label{1})
-ylabel(D.raw.axis.label{2})
-zlabel(D.raw.datcnt.label)
+xlabel(D.raw.ax(1).label)
+ylabel(D.raw.ax(2).label)
+zlabel(D.raw.sig.label)
 colorbar
 
 end

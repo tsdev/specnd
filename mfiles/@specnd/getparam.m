@@ -29,23 +29,11 @@ function varargout = getparam(D,pName)
 
 % returns all parameter name-value pairs in a struct
 if nargin == 1
-    % doesn't work, stupid Matlab struct() function
-    %sField = [D.raw.param.name; D.raw.param.value];
-    %varargout{1} = struct(sField{:});
+    % NO LOOP :P
+    parCell = {D.raw.par(:).name;D.raw.par(:).val};
+    param = struct(parCell{:});
     
-    % loop over all variable
-    param = struct;
-    for ii = 1:numel(D.raw.param.name)
-        param.(D.raw.param.name{ii}) = D.raw.param.value{ii};
-    end
-    
-    
-    
-    if nargout == 0
-        varargout{1} = struct2table(param);
-    else
-        varargout{1} = param;
-    end
+    varargout{1} = param;
     
     if nargout > 1
         varargout{2} = D.raw.param.label;
@@ -55,21 +43,21 @@ end
 
 % find a given parameter
 % index of parameter
-pIdx = find(strcmp(D.raw.param.name,pName));
+pIdx = find(strcmp({D.raw.par(:).name},pName));
 
 if numel(pIdx)==0
-    warning('specnd:ParameterMissing','The parameter does not exists.');
+    warning('specnd:getparam:ParameterMissing','The requested parameter does not exists.');
     varargout = {};
     if nargout > 1
         varargout{2} = {};
     end
 else
-    varargout{1} = D.raw.param.value{pIdx(1)};
+    varargout{1} = D.raw.par(pIdx(1)).val;
     if nargout > 1
-        varargout{2} = D.raw.param.label{pIdx(1)};
+        varargout{2} = D.raw.par(pIdx(1)).label;
     end
     if numel(pIdx) > 1
-        warning('specnd:MultipleParameter','Multiple parameters exist with the same name, returning the first only.')
+        warning('specnd:getparam:MultipleParameter','Multiple parameters exist with the same name, returning the first only.')
     end
 end
 
