@@ -207,11 +207,12 @@ classdef specnd < handle
                 [D.raw.ax(:).name]  = axName{:};
                 [D.raw.ax(:).label] = axLabel{:};
                 
+                % add zero error to each axis
+                zCell = num2cell(zeros(1,axDim));
+                [D.raw.ax(:).err] = zCell{:};
+
             end
             
-            % add zero error to each axis
-            zCell = num2cell(zeros(1,axDim));
-            [D.raw.ax(:).err] = zCell{:};
             validate(D);
         end
         
