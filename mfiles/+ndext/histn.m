@@ -46,7 +46,7 @@ function [Ysum, Nsum] = histn(X, Y, varargin)
 %           the value 0 by default. To make it possible to calculate the
 %           average value of each pixel, set the default value to 1, then
 %           devide Ysum with Nsum element vise:
-%               Yavg = bsxfun(@mrdivide,Ysum,Nsum);
+%               Yavg = bsxfun(@rdivide,Ysum,Nsum);
 %
 % Example:
 %
@@ -123,12 +123,6 @@ if any(nBin<1)
     error('histn:WrongInput','All bin edge vector has to have at least two elements.')
 end
 
-if N==1
-    % treat the stupid problem that size of column vectors is Nx1, give
-    % this extra 1 to feed into accumarray()
-    nBin  = [nBin  1];
-end
-
 % determine bin indices instead of coordinate values and store in X to
 % spare memory and make sure it doesn't return values larger than nBin
 for ii = 1:N
@@ -178,12 +172,24 @@ if nField > 1
     nBinC = num2cell(nBin+1);
     Ysum  = zeros(nBinC{:},nField);
     
+    if N==1
+        % treat the stupid problem that size of column vectors is Nx1, give
+        % this extra 1 to feed into accumarray()
+        nBin  = [nBin  0];
+    end
+
     % the same trick but now for selecting arbitrary number of dimensions
     % to use function handle such as @mean would be very slow
     for ii = 1:nField
         Ysum(selDim{:},ii) = accumarray(X,Y(:,ii),nBin+1,[],emptyval(1));
     end
 else
+    if N==1
+        % treat the stupid problem that size of column vectors is Nx1, give
+        % this extra 1 to feed into accumarray()
+        nBin  = [nBin  0];
+    end
+
     Ysum = accumarray(X,Y,nBin+1,[],emptyval(1));
 end
 
