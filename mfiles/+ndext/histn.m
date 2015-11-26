@@ -1,7 +1,7 @@
 function [Ysum, Nsum] = histn(X, Y, varargin)
 % calculates histogram of arbitrary dimensional data
 %
-% function [Ysum, Nsum] = histcn(X,Y,bin1,bin2,...,'option1',value1)
+% function [Ysum, Nsum] = HISTN(X,Y,bin1,bin2,...,'option1',value1)
 %
 % Any data point with NaN X or Y value is omitted from the binning. Works
 % for non-uniform bins and also optimised for uniform bins with significant
