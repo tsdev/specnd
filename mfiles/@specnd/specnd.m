@@ -94,7 +94,7 @@ classdef specnd < handle
                             sigDim((end+1):numel(axDim)) = 1;
                         end
                         
-                        if numel(axDim)~=numel(sigDim) || any(axDim-sigDim)
+                        if numel(axDim)~=numel(sigDim) || any(~ismember(axDim-sigDim,[0 1]))
                             error('specnd:specnd:WrongInput',['Dimensions of input signal matrix '...
                                 'is incompatible with the given coordinate matrices!'])
                         end
@@ -110,8 +110,8 @@ classdef specnd < handle
                         varargin{2} = varargin{2}.';
                     end
                     
-                    cSize = size(varargin{1})==size(varargin{2},1);
-                    if ~any(cSize)
+                    cSize = size(varargin{1});
+                    if ~any(ismember(cSize-size(varargin{2},1),[0 1]))
                         error('specnd:specnd:WrongInput','Wrong input data dimensions!');
                     end
                     if sum(cSize)==1 && cSize(2)

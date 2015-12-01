@@ -56,8 +56,8 @@ values = values(~spIdx);
 numor = sscanf(lines(110,:),'%f %f %f %f');
 numor = numor(4);
 
-dat.par(end+1).name  = 'numor';
-dat.par(end+1).value = numor;
+dat.par(end+1).name = 'numor';
+dat.par(end).value  = numor;
 
 datStr = lines(113:end,:)';
 
@@ -79,5 +79,11 @@ dat.ax(1).label = '2theta';
 dat.g.value = 1;
 dat.g.name  = '';
 dat.g.label = '';
+
+% add error bar
+% TODO
+dat.err.value = sqrt(dat.sig.value);
+dat.err.name = 'Error';
+dat.err.label = 'Error';
 
 end
