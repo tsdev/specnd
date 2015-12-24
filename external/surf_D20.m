@@ -20,11 +20,9 @@ if nargout > 3
 end
 
 for ii = 1:nDat
-    %zz(:,ii) = dat{ii}.sig.value./dat{ii}.mon.value;
-    zz(:,ii) = dat{ii}.sig.value;
+    zz(:,ii) = dat{ii}.sig.value./dat{ii}.mon.value;
     if nargout > 3
-        %ee(:,ii) = dat{ii}.err.value./dat{ii}.mon.value;
-        ee(:,ii) = dat{ii}.err.value;
+        ee(:,ii) = dat{ii}.err.value./dat{ii}.mon.value;
     end
 end
 
