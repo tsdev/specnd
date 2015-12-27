@@ -13,9 +13,7 @@ for ii = 1:numel(dat)
     end
     
     Ts = dat{ii}.par(lIdx).value;
-    
-    plot(dat{ii}.ax.value,dat{ii}.sig.value./dat{ii}.mon.value,varargin{:});
-    
+    plot(dat{ii}.ax.value,dat{ii}.sig.value./dat{ii}.mon.value);
     
     lStr = getappdata(gcf,'legend');
     
@@ -23,10 +21,8 @@ for ii = 1:numel(dat)
         lStr = {};
     end
     
-    lStr{end+1} = num2str(Ts,'T_s = %6.2f K');
-    
+    lStr{end+1} = num2str(Ts,'T_s = %6.2f K'); %#ok<AGROW>
     legend(lStr);
-    
     setappdata(gcf,'legend',lStr);
     
 end
