@@ -94,6 +94,10 @@ emptyval = [NaN 0];
 if nargin>3 && ischar(varargin{end-1})
     if strcmp('emptyval',varargin{end-1})
         emptyval = varargin{end};
+        
+        if numel(emptyval) ~= 2
+            error('ndext:histn:WrongOption','The emptyval option has to contain a two element vector!')
+        end
     end
     % remove the last two input variables
     varargin = varargin(1:end-2);
