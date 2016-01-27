@@ -31,6 +31,5 @@ axis tight
 box on
 xlabel('Scattering angle (deg)')
 ylabel('Intensity (arb. units)')
-set(gca,'fontsize',12)
 
 end
