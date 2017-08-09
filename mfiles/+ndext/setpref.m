@@ -12,10 +12,27 @@ function setpref(prefName, value)
 % See also ndext.getpref.
 %
 
+% the storage name within built-in getpref/setpref
+store = 'specnd_global';
+
+pidNow = feature('getpid');
+
+if ispref(store) && getpref(store,'pid')~=pidNow
+    rmpref(store);
+end
+
+setpref(store,'pid',pidNow);
+
 if strcmp(prefName,'default')
-    if ispref('specnd_global')
-        rmpref('specnd_global');
+    if ispref(store)
+        rmpref(store);
     end
+    setpref(store,'pid',pidNow);
+    return
+end
+
+if strcmp(prefName,'pid')
+    warning('ndext:getpref:Locked','pid value can not be changed!')
     return
 end
 
@@ -33,11 +50,11 @@ if ~isempty(iPref)
         if ~ischar(value) || ~any(strcmp(value,opt0))
             error('ndext:setpref:WrongInput',['The selected preference has a restricted choice: ' str0{end} '!'])
         end
-        setpref('specnd_global',prefName,value);
+        setpref(store,prefName,value);
     else
         % the value has to be a scalar
         % TODO check for other type of values
-        setpref('specnd_global',prefName,value);
+        setpref(store,prefName,value);
     end
     
 else

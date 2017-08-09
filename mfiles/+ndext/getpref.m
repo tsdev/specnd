@@ -28,13 +28,16 @@ function rPref = getpref(prefName)
 % emptyval	NaN,-inf,inf,0,...	Return value for empty data point
 % mon	double	Global monitor
 
+% the storage name within built-in getpref/setpref
+store = 'specnd_global';
+
 % default values
 dn = {      'fid'       'binmethod' 'bintype'   'autosort'  'ach'   };
 dv = {      1           'center'    'center'    'true'      []      };
 dn = [dn {  'importfun' 'datapath'  'filename'  'emptyval'  'mon'   }];
 dv = [dv {  []          ''          ''          nan         1       }];
-dn = [dn {     'errfun'    }];
-dv = [dv {     @sqrt       }];
+dn = [dn {  'errfun'    'pid'            }];
+dv = [dv {  @sqrt       feature('getpid')}];
 
 dl = {...
     'file identifier for text output'...
@@ -48,18 +51,27 @@ dl = {...
     'signal value for empty pixels'...
     'global monitor value'...
     'function that calculates the error bar from a given signal value'...
+    'PID value assigned to the running Matlab session, used to reset all pref after restart'...
     };
 
 dPref = struct('val',{},'name',{},'label',{});
 
 [dPref(1:numel(dv),1).name] = dn{:};
-[dPref(:).label]          = dl{:};
-[dPref(:).val]            = dv{:};
+[dPref(:).label]            = dl{:};
+[dPref(:).val]              = dv{:};
 
 % get stored preferences
-sPref = getpref('specnd_global');
+sPref = getpref(store);
 
-if (nargin>0)
+pidNow = feature('getpid');
+
+if ~isempty(sPref) && sPref.pid~=pidNow
+    rmpref(store);
+    setpref(store,'pid',pidNow);
+    sPref = struct('pid',pidNow);
+end
+
+if nargin>0
     if strcmp(prefName,'default')
         % return default preference values
         rPref = dPref;
@@ -68,7 +80,6 @@ if (nargin>0)
     
     % if a specific value is requested, check if it exist in the default value
     % list
-    
     iPref = find(strcmp(prefName,{dPref(:).name}),1);
     if isempty(iPref)
         error('specnd:getndpref:WrongName','The requested specnd preference does not exists!');
